@@ -8,7 +8,9 @@ export default function PatientDashboard() {
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    age: ""
+    age: "",
+    gender: "",
+    address: "",
   });
 
   const [search, setSearch] = useState("");
@@ -34,10 +36,19 @@ export default function PatientDashboard() {
       await addPatient({
         name: form.name,
         phone: form.phone,
-        age: Number(form.age)
+        age: Number(form.age),
+        gender: form.gender,
+        address: form.address,
       });
 
-      setForm({ name: "", phone: "", age: "" });
+      setForm({
+        name: "",
+        phone: "",
+        age: "",
+        gender: "",
+        address: "",
+      });
+
       loadPatients();
     } catch (err) {
       console.error(err);
@@ -57,12 +68,10 @@ export default function PatientDashboard() {
 
   return (
     <div style={{ padding: "20px" }}>
-
       <h2>👤 Patients</h2>
 
-      {/* FORM */}
+      {/* ADD PATIENT FORM */}
       <div style={{ marginBottom: "20px" }}>
-
         <input
           placeholder="Name"
           value={form.name}
@@ -87,15 +96,33 @@ export default function PatientDashboard() {
           }
         />
 
+        <select
+          value={form.gender}
+          onChange={(e) =>
+            setForm({ ...form, gender: e.target.value })
+          }
+        >
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <input
+          placeholder="Address"
+          value={form.address}
+          onChange={(e) =>
+            setForm({ ...form, address: e.target.value })
+          }
+        />
+
         <button onClick={handleAdd}>
           Add Patient
         </button>
-
       </div>
 
       {/* SEARCH */}
       <div style={{ marginBottom: "20px" }}>
-
         <input
           placeholder="Search by phone"
           value={search}
@@ -105,7 +132,6 @@ export default function PatientDashboard() {
         <button onClick={handleSearch}>
           Search
         </button>
-
       </div>
 
       {/* TABLE */}
@@ -119,13 +145,15 @@ export default function PatientDashboard() {
               <th>Name</th>
               <th>Phone</th>
               <th>Age</th>
+              <th>Gender</th>
+              <th>Address</th>
             </tr>
           </thead>
 
           <tbody>
             {patients.length === 0 ? (
               <tr>
-                <td colSpan="4">No patients found</td>
+                <td colSpan="6">No patients found</td>
               </tr>
             ) : (
               patients.map((p) => (
@@ -134,14 +162,14 @@ export default function PatientDashboard() {
                   <td>{p.name}</td>
                   <td>{p.phone}</td>
                   <td>{p.age}</td>
+                  <td>{p.gender}</td>
+                  <td>{p.address}</td>
                 </tr>
               ))
             )}
           </tbody>
-
         </table>
       )}
-
     </div>
   );
 }
