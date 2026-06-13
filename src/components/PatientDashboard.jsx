@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { getPatients, addPatient, searchPatientByPhone } from "../api/api";
 
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 export default function PatientDashboard() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -66,41 +70,75 @@ export default function PatientDashboard() {
     }
   };
 
+  // ================= EXPORT EXCEL =================
+  const exportExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(patients);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Patients");
+    XLSX.writeFile(workbook, "patients.xlsx");
+  };
+
+  // ================= DOWNLOAD PDF =================
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+
+    autoTable(doc, {
+      head: [["ID", "Name", "Phone", "Age", "Gender", "Address"]],
+      body: patients.map((p) => [
+        p.id,
+        p.name,
+        p.phone,
+        p.age,
+        p.gender,
+        p.address,
+      ]),
+    });
+
+    doc.save("patients.pdf");
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h2>👤 Patients</h2>
+
+      {/* ACTION BUTTONS */}
+      <div style={{ marginBottom: "15px" }}>
+        <button onClick={exportExcel} style={{ marginRight: "10px" }}>
+          Export Excel
+        </button>
+
+        <button onClick={downloadPDF} style={{ marginRight: "10px" }}>
+          Download PDF
+        </button>
+
+        <button onClick={() => window.print()}>
+          Print
+        </button>
+      </div>
 
       {/* ADD PATIENT FORM */}
       <div style={{ marginBottom: "20px" }}>
         <input
           placeholder="Name"
           value={form.name}
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
 
         <input
           placeholder="Phone"
           value={form.phone}
-          onChange={(e) =>
-            setForm({ ...form, phone: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
 
         <input
           placeholder="Age"
           value={form.age}
-          onChange={(e) =>
-            setForm({ ...form, age: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, age: e.target.value })}
         />
 
         <select
           value={form.gender}
-          onChange={(e) =>
-            setForm({ ...form, gender: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, gender: e.target.value })}
         >
           <option value="">Select Gender</option>
           <option value="Male">Male</option>
@@ -111,14 +149,10 @@ export default function PatientDashboard() {
         <input
           placeholder="Address"
           value={form.address}
-          onChange={(e) =>
-            setForm({ ...form, address: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, address: e.target.value })}
         />
 
-        <button onClick={handleAdd}>
-          Add Patient
-        </button>
+        <button onClick={handleAdd}>Add Patient</button>
       </div>
 
       {/* SEARCH */}
@@ -129,9 +163,7 @@ export default function PatientDashboard() {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <button onClick={handleSearch}>
-          Search
-        </button>
+        <button onClick={handleSearch}>Search</button>
       </div>
 
       {/* TABLE */}
